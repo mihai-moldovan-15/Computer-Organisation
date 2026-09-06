@@ -1,7 +1,12 @@
 .data
-BUFFER .skip 1024 		# worst-case scenario we need ((2^25 ) - 1 ) * (2^9 - 1) bytes
+# BUFFER .skip 1024 		# worst-case scenario we need ((2^25 ) - 1 ) * (2^9 - 1) bytes
+
+# Segmentation fault 
 
 .text
+output: .asciz "%c"
+
+outputAdress: .asciz "Your adress is: %lX\n" 
 
 .include "helloWorld.s"
 
@@ -22,16 +27,53 @@ decode:
 	# prologue
 	pushq	%rbp 			# push the base pointer (and align the stack)
 	movq	%rsp, %rbp		# copy stack pointer value to base pointer
+	subq $8, %rsp			# allign the stack pointer
+	pushq %r12
 
-	# rdi - adresa primului mesaj
-	# rcx = rdi 
-	# dupa ce procesezi un quad, dai switch la primul byte sau bit, primii 2 bytes sunt unknown deci nu prea conteaza
-		# te opresti cand ajungi la un %rcx pentru care bit-byte ul de check e on
-	# %rcx = %rdi + offset, unde offset = 4 byte index 
 	
+	movq %rdi, %rcx
+	movq %rdi, %r12
+
+	# R8 - next memory block to visit
+	# R9 - how many times to print
+	# R10 - the ASCII character needed
+
+	#cu rcx avem treaba
+outerLoop:
+	movq $0, %r9		# count
+	movb 6(%rcx), %r9b
 	
+	movq $0, %r10		# the character
+	movb 7(%rcx), %r10b
+
+	innerLoop:
+	cmpq $0, %r9
+	je endInner
+	
+	subq $1, %r9
+	movq $0, %rax
+	movq $output, %rdi
+	movq %r10, %rsi 
+	
+	call printf
+	
+	jmp innerLoop
+
+endInner:
+
+	## adresa urmatoare
+	movq $0, %r8
+	movl 2(%rcx), %r8d
+	
+	cmpq $0, %r8
+	je endOuter
+
+	leaq (%r12, %r8), %rcx
+	jmp outerLoop
+endOuter:
 
 	# epilogue
+	popq %r12
 	movq	%rbp, %rsp		# clear local variables from stack
 	popq	%rbp			# restore base pointer location 
 	ret
