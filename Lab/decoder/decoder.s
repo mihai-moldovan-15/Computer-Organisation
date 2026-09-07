@@ -27,12 +27,11 @@ decode:
 	# prologue
 	pushq	%rbp 			# push the base pointer (and align the stack)
 	movq	%rsp, %rbp		# copy stack pointer value to base pointer
-	subq $8, %rsp			# allign the stack pointer
-	pushq %r12
+	#subq	 $8, %rsp		# allign the stack pointer
 
 	
 	movq %rdi, %rcx
-	movq %rdi, %r12
+	movq (%rdi), %r12
 
 	# R8 - next memory block to visit
 	# R9 - how many times to print
@@ -47,19 +46,19 @@ outerLoop:
 	movb 7(%rcx), %r10b
 
 	innerLoop:
-	cmpq $0, %r9
-	je endInner
-	
-	subq $1, %r9
-	movq $0, %rax
-	movq $output, %rdi
-	movq %r10, %rsi 
-	
-	call printf
-	
-	jmp innerLoop
+		cmpq $0, %r9
+		je endInner
+		
+		subq $1, %r9
+		movq $0, %rax	# no vector registers for printf
+		movq $output, %rdi	# param1: format string
+		movq %r10, %rsi 	# param1: r10 - character
+		
+		call printf
+		
+		jmp innerLoop
 
-endInner:
+	endInner:
 
 	## adresa urmatoare
 	movq $0, %r8
@@ -73,18 +72,20 @@ endInner:
 endOuter:
 
 	# epilogue
-	popq %r12
 	movq	%rbp, %rsp		# clear local variables from stack
 	popq	%rbp			# restore base pointer location 
 	ret
 
 main:
+	# prologue 
 	pushq	%rbp 			# push the base pointer (and align the stack)
 	movq	%rsp, %rbp		# copy stack pointer value to base pointer
 
 	movq	$MESSAGE, %rdi	# first parameter: address of the message
 	call	decode			# call decode
 
+	# epilogue
+	movq 	%rbp, %rsp
 	popq	%rbp			# restore base pointer location 
 	movq	$0, %rdi		# load program exit code
 	call	exit			# exit the program
