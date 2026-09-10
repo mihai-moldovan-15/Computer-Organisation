@@ -8,11 +8,11 @@ output: .asciz "%c"
 
 decode:
 	# prologue
-    pushq   %r14
-    pushq   %r12
 	pushq	%rbp 			            # push the base pointer (and align the stack)
 	movq	%rsp, %rbp		            # copy stack pointer value to base pointer
 
+    pushq   %r14
+    pushq   %r12
 
                                         # rcx - value adress (0X00020000000A0148)
                                         # rdx - adress of the pointer to the first message
@@ -80,12 +80,11 @@ decode:
         movq (%r12), %rcx               # rcx is still the "value" address
         jmp outerLoop
 
+
     endOuterLoop:
     # epilogue
-	movq	%rbp, %rsp		# clear local variables from stack
+    movq	%rbp, %rsp		# clear local variables from stack
 	popq	%rbp			# restore base pointer location 
-    popq    %r12
-    popq    %r14
 	ret
 
 main:

@@ -6,8 +6,10 @@ output: .asciz "Your output is: %ld\n"
 
 .global main
 
+#  %RBX, %RSP, %RBP, and %R12 through %R15 - callee-saved
+#  %RAX, %RCX, %RDX, %RDI, %RSI, and %R8 through %R11 - caller-saved
 pow: 
-# prologue
+    # prologue
     pushq %rbp
     movq %rsp, %rbp
 
@@ -32,28 +34,28 @@ loop:
     jmp loop
 
 endLoop:
-#epilogue
+    #epilogue
     movq %rbp, %rsp
     popq %rbp
     ret 
 
 main:
     # prologue
-    pushq %rbp
-    movq %rsp, %rbp
+    pushq %rbp                                  
+    movq %rsp, %rbp                            
 
     movq $promptBase, %rdi                      # param1: format string
     movq $0, %rax                               # no vector registers for printf
 
-    call printf
+    call printf                                 # asking the user for input(base)
 
     movq $0, %rax                               # no vector registers for scanf
     movq $input, %rdi
     subq $16, %rsp
-    leaq -16(%rbp), %rsi
+    leaq -8(%rbp), %rsi
     call scanf
 
-    movq -16(%rbp), %r12
+    movq -8(%rbp), %r12
     movq $promptExponent, %rdi                  # param1: format string
     movq $0, %rax                               # no vector registers for printf
 
@@ -62,10 +64,10 @@ main:
     movq $0, %rax                               # no vector registers for scanf
     movq $input, %rdi
     subq $16, %rsp
-    leaq -16(%rbp), %rsi
+    leaq -8(%rbp), %rsi
     call scanf
 
-    movq -16(%rbp), %rsi
+    movq -8(%rbp), %rsi
     movq %r12, %rdi
 
     movq $0, %rax                                # no vector registers for pow
