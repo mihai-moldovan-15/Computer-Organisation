@@ -28,6 +28,10 @@ check_validity:
 	pushq	%rbp 			    # push the base pointer (and align the stack)
 	movq	%rsp, %rbp		    # copy stack pointer value to base pointer
 
+    pushq   %r12
+    pushq   %r13
+    pushq   %r14
+
     movq    %rdi, %r12          # %r12 - the address of the string
 
     outerLoop:
@@ -132,7 +136,7 @@ check_validity:
     
     endInnerLoop:
     addq $1, %r12
-    ///aici vine si o afisare
+
     cmpb $0, %al           
 	je printfailure
     
@@ -151,6 +155,10 @@ check_validity:
         jmp outerLoop
 
 end:
+    popq    %r14
+    popq    %r13
+    popq    %r12
+    
 	movq	%rbp, %rsp		# clear local variables from stack
 	popq	%rbp			# restore base pointer location 
 	ret

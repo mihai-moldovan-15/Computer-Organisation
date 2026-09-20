@@ -1,6 +1,5 @@
 .text
 
-# 10 test sequences (mix of valid and invalid)
 MESSAGE:
 	.asciz "()"
 	.asciz "(())"
